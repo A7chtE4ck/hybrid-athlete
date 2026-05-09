@@ -1,0 +1,9 @@
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{min-height:100dvh;font-family:var(--font-body);font-size:var(--text-base);
+    color:var(--color-text);background:var(--color-bg);display:flex;flex-direction:column;}
+img{display:block;max-width:100%}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit}
+input,select,textarea{font:inherit;color:inherit}
+a,button,[role="button"]{transition:color var(--transition),background var(--transition),
+border-color var(--transition),box-shadow var(--transition)}
