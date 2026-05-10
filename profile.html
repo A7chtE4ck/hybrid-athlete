@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil</title>
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,600,700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root, [data-theme="light"] {
+            --color-bg: #f7f6f2; --color-surface: #f9f8f5; --color-surface-2: #fbfbf9;
+            --color-surface-offset: #f3f0ec; --color-border: #d4d1ca; --color-divider: #dcd9d5;
+            --color-text: #28251d; --color-text-muted: #7a7974; --color-text-faint: #bab9b4;
+            --color-primary: #01696f; --color-primary-hover: #0c4e54; --color-primary-highlight: #cedcd8;
+            --color-gold: #d19900; --color-gold-highlight: #e9e0c6;
+            --color-orange: #da7101; --color-orange-highlight: #e7d7c4;
+            --color-success: #437a22; --color-success-highlight: #d4dfcc;
+            --shadow-sm: 0 1px 2px oklch(0.2 0.01 80 / 0.06);
+            --shadow-md: 0 4px 12px oklch(0.2 0.01 80 / 0.08);
+            --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.75rem;
+            --radius-xl: 1rem; --radius-full: 9999px;
+            --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+            --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem;
+            --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+            --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+            --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+            --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+            --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2.25rem);
+            --font-body: "Satoshi", sans-serif; --font-mono: "JetBrains Mono", monospace;
+        }
+        [data-theme="dark"] {
+            --color-bg: #171614; --color-surface: #1c1b19; --color-surface-2: #201f1d;
+            --color-surface-offset: #1d1c1a; --color-border: #393836; --color-divider: #262523;
+            --color-text: #cdccca; --color-text-muted: #797876; --color-text-faint: #5a5957;
+            --color-primary: #4f98a3; --color-primary-hover: #227f8b; --color-primary-highlight: #313b3b;
+            --color-gold: #e8af34; --color-gold-highlight: #4d4332;
+            --color-orange: #fdab43; --color-orange-highlight: #564b3e;
+            --color-success: #6daa45; --color-success-highlight: #3a4435;
+            --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.2); --shadow-md: 0 4px 12px oklch(0 0 0 / 0.3);
+        }
+        html { -webkit-font-smoothing: antialiased; }
+        body {
+            min-height: 100dvh; font-family: var(--font-body); font-size: var(--text-base);
+            color: var(--color-text); background: var(--color-bg);
+            display: flex; align-items: center; justify-content: center; padding: var(--space-4);
+        }
+        .profile-card {
+            width: 100%; max-width: 420px; background: var(--color-surface);
+            border: 1px solid oklch(from var(--color-text) l c h / 0.08);
+            border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-md);
+        }
+        .profile-banner {
+            height: 88px;
+            background: linear-gradient(135deg in oklch, var(--color-primary) 0%, color-mix(in oklch, var(--color-primary) 55%, var(--color-bg)) 100%);
+            position: relative;
+        }
+        .theme-toggle {
+            position: absolute; top: var(--space-3); right: var(--space-3);
+            background: oklch(from var(--color-bg) l c h / 0.22); border: none;
+            border-radius: var(--radius-full); width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            color: white; cursor: pointer; backdrop-filter: blur(4px);
+            transition: background 180ms ease;
+        }
+        .theme-toggle:hover { background: oklch(from var(--color-bg) l c h / 0.38); }
+        .profile-avatar-wrap {
+            position: relative; display: flex; padding: 0 var(--space-6);
+            margin-top: -32px; margin-bottom: var(--space-4);
+            align-items: flex-end; gap: var(--space-3);
+        }
+        .avatar {
+            width: 64px; height: 64px; border-radius: var(--radius-full);
+            background: linear-gradient(135deg in oklch, var(--color-gold) 0%, var(--color-orange) 100%);
+            border: 3px solid var(--color-surface);
+            display: flex; align-items: center; justify-content: center;
+            font-size: var(--text-lg); font-weight: 700; color: white;
+            flex-shrink: 0; box-shadow: var(--shadow-md); letter-spacing: -0.02em;
+        }
+        .profile-name-group { padding-bottom: var(--space-1); flex: 1; }
+        .profile-name { font-size: var(--text-base); font-weight: 700; color: var(--color-text); line-height: 1.2; }
+        .profile-handle { font-size: var(--text-xs); color: var(--color-text-muted); margin-top: 2px; }
+        .edit-btn {
+            padding: var(--space-1) var(--space-3); font-size: var(--text-xs); font-weight: 600;
+            font-family: var(--font-body); border: 1.5px solid var(--color-border);
+            background: transparent; border-radius: var(--radius-full); color: var(--color-text-muted);
+            cursor: pointer; transition: all 180ms ease; margin-bottom: var(--space-1);
+        }
+        .edit-btn:hover { border-color: var(--color-primary); color: var(--color-primary); }
+        .stats-row {
+            display: grid; grid-template-columns: 1fr 1px 1fr 1px 1fr;
+            padding: var(--space-4) var(--space-6); gap: 0;
+        }
+        .stat-divider { background: var(--color-divider); align-self: stretch; }
+        .stat-item { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); padding: var(--space-1) var(--space-2); }
+        .stat-icon { width: 28px; height: 28px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; }
+        .stat-icon.streak { background: var(--color-orange-highlight); }
+        .stat-icon.workouts { background: var(--color-primary-highlight); }
+        .stat-icon.weight { background: var(--color-gold-highlight); }
+        .stat-icon svg { width: 15px; height: 15px; }
+        .stat-icon.streak svg { stroke: var(--color-orange); }
+        .stat-icon.workouts svg { stroke: var(--color-primary); }
+        .stat-icon.weight svg { stroke: var(--color-gold); }
+        .stat-value {
+            font-family: var(--font-mono); font-size: var(--text-lg); font-weight: 600;
+            color: var(--color-text); line-height: 1; font-variant-numeric: tabular-nums;
+        }
+        .stat-label { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 500; letter-spacing: 0.02em; }
+        .card-divider { height: 1px; background: var(--color-divider); margin: 0 var(--space-6); }
+        .weight-section { padding: var(--space-4) var(--space-6) var(--space-5); }
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-3); }
+        .section-title { font-size: var(--text-sm); font-weight: 600; color: var(--color-text); display: flex; align-items: center; gap: var(--space-2); }
+        .section-title-dot { width: 6px; height: 6px; border-radius: var(--radius-full); background: var(--color-gold); }
+        .weight-add-btn {
+            font-size: var(--text-xs); font-weight: 600; font-family: var(--font-body);
+            color: var(--color-primary); background: var(--color-primary-highlight);
+            border: none; border-radius: var(--radius-full); padding: var(--space-1) var(--space-3);
+            cursor: pointer; transition: all 180ms ease;
+        }
+        .weight-add-btn:hover { background: color-mix(in oklch, var(--color-primary) 20%, var(--color-surface)); }
+        .weight-current { display: flex; align-items: baseline; gap: var(--space-2); margin-bottom: var(--space-3); }
+        .weight-big {
+            font-family: var(--font-mono); font-size: var(--text-xl); font-weight: 600;
+            color: var(--color-text); font-variant-numeric: tabular-nums;
+        }
+        .weight-unit { font-size: var(--text-sm); color: var(--color-text-muted); font-weight: 500; }
+        .weight-delta { font-size: var(--text-xs); font-weight: 600; padding: 2px var(--space-2); border-radius: var(--radius-full); }
+        .weight-delta.down { background: var(--color-success-highlight); color: var(--color-success); }
+        .weight-delta.up { background: var(--color-orange-highlight); color: var(--color-orange); }
+        .weight-chart { display: flex; align-items: flex-end; gap: 5px; height: 40px; }
+        .weight-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; height: 100%; justify-content: flex-end; }
+        .weight-bar { width: 100%; border-radius: 3px 3px 0 0; background: color-mix(in oklch, var(--color-gold) 28%, var(--color-surface-offset)); transition: background 180ms ease; min-height: 4px; }
+        .weight-bar.active { background: var(--color-gold); }
+        .weight-bar-label { font-size: 9px; color: var(--color-text-faint); font-variant-numeric: tabular-nums; }
+        .weight-input-row { display: none; align-items: center; gap: var(--space-2); margin-top: var(--space-3); }
+        .weight-input-row.visible { display: flex; }
+        .weight-input {
+            flex: 1; background: var(--color-surface-offset); border: 1.5px solid var(--color-border);
+            border-radius: var(--radius-md); padding: var(--space-2) var(--space-3);
+            font-family: var(--font-mono); font-size: var(--text-sm); color: var(--color-text);
+            outline: none; transition: border-color 180ms ease;
+        }
+        .weight-input:focus { border-color: var(--color-gold); }
+        .weight-save-btn {
+            background: var(--color-gold); color: white; border: none; border-radius: var(--radius-md);
+            padding: var(--space-2) var(--space-3); font-size: var(--text-xs); font-weight: 700;
+            font-family: var(--font-body); cursor: pointer; transition: all 180ms ease;
+        }
+        .weight-save-btn:hover { background: color-mix(in oklch, var(--color-gold) 80%, var(--color-text)); }
+    </style>
+</head>
+<body>
+<div class="profile-card">
+    <div class="profile-banner">
+        <button class="theme-toggle" data-theme-toggle aria-label="Theme wechseln">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+            </svg>
+        </button>
+    </div>
+    <div class="profile-avatar-wrap">
+        <div class="avatar">MK</div>
+        <div class="profile-name-group">
+            <div class="profile-name">Max Krause</div>
+            <div class="profile-handle">Mitglied seit Jan 2024</div>
+        </div>
+        <button class="edit-btn">Bearbeiten</button>
+    </div>
+    <div class="stats-row">
+        <div class="stat-item">
+            <div class="stat-icon streak">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2c0 6-6 8-6 14a6 6 0 0 0 12 0c0-6-6-8-6-14z"/><path d="M12 12c0 3-2 4-2 7a2 2 0 0 0 4 0c0-3-2-4-2-7z"/>
+                </svg>
+            </div>
+            <span class="stat-value" id="streakVal">14</span>
+            <span class="stat-label">Streak</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <div class="stat-icon workouts">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 4v16M18 4v16M2 8h4M18 8h4M2 16h4M18 16h4"/>
+                </svg>
+            </div>
+            <span class="stat-value" id="workoutsVal">87</span>
+            <span class="stat-label">Workouts</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+            <div class="stat-icon weight">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+            </div>
+            <span class="stat-value" id="weightVal">78.4</span>
+            <span class="stat-label">kg</span>
+        </div>
+    </div>
+    <div class="card-divider"></div>
+    <div class="weight-section">
+        <div class="section-header">
+            <div class="section-title"><div class="section-title-dot"></div>Gewichtsverlauf</div>
+            <button class="weight-add-btn" id="addWeightBtn">+ Eintragen</button>
+        </div>
+        <div class="weight-current">
+            <span class="weight-big" id="weightDisplay">78.4</span>
+            <span class="weight-unit">kg</span>
+            <span class="weight-delta down" id="weightDelta">&#9660; 1.2 kg</span>
+        </div>
+        <div class="weight-chart" id="weightChart"></div>
+        <div class="weight-input-row" id="weightInputRow">
+            <input type="number" class="weight-input" id="weightInput" placeholder="z.B. 78.2" step="0.1" min="30" max="250">
+            <button class="weight-save-btn" id="saveWeightBtn">Speichern</button>
+        </div>
+    </div>
+</div>
+<script>
+    (function(){
+        const t=document.querySelector("[data-theme-toggle]"),r=document.documentElement;
+        let d=r.getAttribute("data-theme")||"dark";
+        r.setAttribute("data-theme",d);
+        function ui(){t.innerHTML=d==="dark"?"<svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><circle cx=\"12\" cy=\"12\" r=\"5\"/><path d=\"M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42\"/></svg>":"<svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z\"/></svg>";}
+        ui();
+        t.addEventListener("click",()=>{d=d==="dark"?"light":"dark";r.setAttribute("data-theme",d);ui();});
+    })();
+
+    const wh=[{l:"Mo",v:80.1},{l:"Di",v:79.6},{l:"Mi",v:79.2},{l:"Do",v:79.0},{l:"Fr",v:78.8},{l:"Sa",v:78.6},{l:"So",v:78.4}];
+
+    function renderChart(){
+        const c=document.getElementById("weightChart");
+        const vals=wh.map(x=>x.v);
+        const mn=Math.min(...vals)-0.5,mx=Math.max(...vals)+0.5;
+        c.innerHTML="";
+        vals.forEach((v,i)=>{
+            const w=document.createElement("div");w.className="weight-bar-wrap";
+            const pct=((v-mn)/(mx-mn))*100;
+            const b=document.createElement("div");b.className="weight-bar"+(i===vals.length-1?" active":"");
+            b.style.height=Math.max(6,pct*0.36)+"px";
+            const lb=document.createElement("div");lb.className="weight-bar-label";lb.textContent=wh[i].l;
+            w.appendChild(b);w.appendChild(lb);c.appendChild(w);
+        });
+    }
+
+    function updateDisplay(){
+        const lat=wh[wh.length-1].v,prev=wh[wh.length-2]?.v;
+        document.getElementById("weightDisplay").textContent=lat.toFixed(1);
+        document.getElementById("weightVal").textContent=lat.toFixed(1);
+        if(prev!==undefined){
+            const diff=lat-prev,el=document.getElementById("weightDelta");
+            if(diff<0){el.textContent="\u25bc "+Math.abs(diff).toFixed(1)+" kg";el.className="weight-delta down";}
+            else if(diff>0){el.textContent="\u25b2 "+diff.toFixed(1)+" kg";el.className="weight-delta up";}
+            else{el.textContent="\u2014 \u00b10 kg";el.className="weight-delta down";}
+        }
+    }
+
+    renderChart();updateDisplay();
+
+    const addBtn=document.getElementById("addWeightBtn"),row=document.getElementById("weightInputRow"),inp=document.getElementById("weightInput"),sav=document.getElementById("saveWeightBtn");
+    addBtn.addEventListener("click",()=>{row.classList.toggle("visible");if(row.classList.contains("visible"))inp.focus();});
+    sav.addEventListener("click",()=>{
+        const v=parseFloat(inp.value);
+        if(!isNaN(v)&&v>30&&v<300){
+            const days=["Mo","Di","Mi","Do","Fr","Sa","So"];
+            wh.push({l:days[wh.length%7],v});
+            if(wh.length>7)wh.shift();
+            renderChart();updateDisplay();inp.value="";row.classList.remove("visible");
+        }
+    });
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter")sav.click();});
+
+    function animCount(el,target,dec,dur){
+        const s=performance.now();
+        function f(now){const p=Math.min((now-s)/dur,1),e=1-Math.pow(1-p,3);el.textContent=(target*e).toFixed(dec);if(p<1)requestAnimationFrame(f);}
+        requestAnimationFrame(f);
+    }
+    setTimeout(()=>{
+        animCount(document.getElementById("streakVal"),14,0,700);
+        animCount(document.getElementById("workoutsVal"),87,0,900);
+        animCount(document.getElementById("weightVal"),78.4,1,1000);
+        animCount(document.getElementById("weightDisplay"),78.4,1,1000);
+    },200);
+</script>
+</body>
+</html>

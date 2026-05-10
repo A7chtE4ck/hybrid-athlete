@@ -5,7 +5,8 @@ const VIEW_TITLES = {
     progress:    'Fortschritt',
     exercises:   'Übungen',
     programs:    'Programme',
-    bodyweight:  'Körpergewicht'
+    bodyweight:  'Körpergewicht',
+    profile: 'Profil',
 };
 
 function navigate(view) {
@@ -731,4 +732,61 @@ function toast(msg, type = 'success') {
     el.innerHTML = (type === 'success' ? '✓ ' : type === 'error' ? '✕ ' : '') + msg;
     document.getElementById('toast').appendChild(el);
     setTimeout(() => el.remove(), 3000);
+}
+
+function renderProfileView() {
+    const workouts = state.workouts || [];
+    const bwEntries = (state.bodyweightLog || []).slice().sort((a,b) => a.date.localeCompare(b.date));
+
+    // Workout-Count
+    document.getElementById('profile-workouts').textContent = workouts.length;
+
+    // Streak berechnen
+    const today = new Date().toISOString().slice(0,10);
+    const dates = [...new Set(workouts.map(w => w.date))].sort((a,b) => b.localeCompare(a));
+    let streak = 0, cur = today;
+    for (const d of dates) {
+        if (d === cur) { streak++; cur = prevDay(cur); }
+        else break;
+    }
+    document.getElementById('profile-streak').textContent = streak;
+
+    // Gewicht
+    if (bwEntries.length > 0) {
+        const latest = bwEntries[bwEntries.length - 1];
+        const prev = bwEntries[bwEntries.length - 2];
+        document.getElementById('profile-weight').textContent = latest.weight.toFixed(1);
+        document.getElementById('profile-weight-big').textContent = latest.weight.toFixed(1);
+        if (prev) {
+            const diff = latest.weight - prev.weight;
+            const el = document.getElementById('profile-weight-delta');
+            el.textContent = (diff < 0 ? '▼ ' : '▲ +') + Math.abs(diff).toFixed(1) + ' kg';
+            el.className = 'weight-delta ' + (diff <= 0 ? 'down' : 'up');
+        }
+        renderProfileWeightChart(bwEntries.slice(-7));
+    }
+}
+
+function prevDay(dateStr) {
+    const d = new Date(dateStr);
+    d.setDate(d.getDate() - 1);
+    return d.toISOString().slice(0,10);
+}
+
+function renderProfileWeightChart(entries) {
+    const chart = document.getElementById('profile-weight-chart');
+    if (!chart) return;
+    const vals = entries.map(e => e.weight);
+    const mn = Math.min(...vals) - 0.5, mx = Math.max(...vals) + 0.5;
+    chart.innerHTML = '';
+    entries.forEach((e, i) => {
+        const wrap = document.createElement('div'); wrap.className = 'weight-bar-wrap';
+        const pct = ((e.weight - mn) / (mx - mn)) * 100;
+        const bar = document.createElement('div');
+        bar.className = 'weight-bar' + (i === entries.length - 1 ? ' active' : '');
+        bar.style.height = Math.max(6, pct * 0.36) + 'px';
+        const lbl = document.createElement('div'); lbl.className = 'weight-bar-label';
+        lbl.textContent = e.date.slice(5); // MM-DD
+        wrap.appendChild(bar); wrap.appendChild(lbl); chart.appendChild(wrap);
+    });
 }
