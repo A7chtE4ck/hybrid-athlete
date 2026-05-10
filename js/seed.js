@@ -59,5 +59,17 @@ function seedData() {
         };
     });
 
+    state.bodyweight = [
+        { date: new Date(Date.now() - 6*86400000).toISOString().split('T')[0], weight: 80.1 },
+        { date: new Date(Date.now() - 5*86400000).toISOString().split('T')[0], weight: 79.6 },
+        { date: new Date(Date.now() - 4*86400000).toISOString().split('T')[0], weight: 79.2 },
+        { date: new Date(Date.now() - 3*86400000).toISOString().split('T')[0], weight: 79.0 },
+        { date: new Date(Date.now() - 2*86400000).toISOString().split('T')[0], weight: 78.8 },
+        { date: new Date(Date.now() - 1*86400000).toISOString().split('T')[0], weight: 78.6 },
+        { date: new Date().toISOString().split('T')[0], weight: 78.4 },
+    ];
+
+    save();
+
     save();
 }
