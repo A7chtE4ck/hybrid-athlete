@@ -49,7 +49,8 @@ const VIEW_RENDERERS = {
     progress:   renderProgress,
     exercises:  renderExercises,
     programs:   renderPrograms,
-    bodyweight: renderBodyweight
+    bodyweight: renderBodyweight,
+    profile: renderProfileView,
 };
 
 function renderView(view) {
@@ -735,36 +736,118 @@ function toast(msg, type = 'success') {
 }
 
 function renderProfileView() {
-    const workouts = state.workouts || [];
-    const bwEntries = (state.bodyweightLog || []).slice().sort((a,b) => a.date.localeCompare(b.date));
+    const workouts  = state.workouts  || [];
+    const bwEntries = (state.bodyweight || [])
+        .slice()
+        .sort((a, b) => a.date.localeCompare(b.date));
 
-    // Workout-Count
-    document.getElementById('profile-workouts').textContent = workouts.length;
+    // ── Stats ──────────────────────────────────────────────
+    // Streak: calcStreak() aus dem Hauptcode wiederverwenden
+    const streakEl = document.getElementById('streakVal');
+    if (streakEl) streakEl.textContent = calcStreak();
 
-    // Streak berechnen
-    const today = new Date().toISOString().slice(0,10);
-    const dates = [...new Set(workouts.map(w => w.date))].sort((a,b) => b.localeCompare(a));
-    let streak = 0, cur = today;
-    for (const d of dates) {
-        if (d === cur) { streak++; cur = prevDay(cur); }
-        else break;
-    }
-    document.getElementById('profile-streak').textContent = streak;
+    const workoutsEl = document.getElementById('workoutsVal');
+    if (workoutsEl) workoutsEl.textContent = workouts.length;
 
-    // Gewicht
+    // ── Gewicht ────────────────────────────────────────────
+    const weightValEl  = document.getElementById('weightVal');
+    const weightDispEl = document.getElementById('weightDisplay');
+    const weightDelta  = document.getElementById('weightDelta');
+
     if (bwEntries.length > 0) {
         const latest = bwEntries[bwEntries.length - 1];
-        const prev = bwEntries[bwEntries.length - 2];
-        document.getElementById('profile-weight').textContent = latest.weight.toFixed(1);
-        document.getElementById('profile-weight-big').textContent = latest.weight.toFixed(1);
-        if (prev) {
+        const prev   = bwEntries[bwEntries.length - 2];
+
+        if (weightValEl)  weightValEl.textContent  = latest.weight.toFixed(1);
+        if (weightDispEl) weightDispEl.textContent = latest.weight.toFixed(1);
+
+        if (prev && weightDelta) {
             const diff = latest.weight - prev.weight;
-            const el = document.getElementById('profile-weight-delta');
-            el.textContent = (diff < 0 ? '▼ ' : '▲ +') + Math.abs(diff).toFixed(1) + ' kg';
-            el.className = 'weight-delta ' + (diff <= 0 ? 'down' : 'up');
+            if (diff < 0) {
+                weightDelta.textContent = '▼ ' + Math.abs(diff).toFixed(1) + ' kg';
+                weightDelta.className   = 'weight-delta down';
+            } else if (diff > 0) {
+                weightDelta.textContent = '▲ +' + diff.toFixed(1) + ' kg';
+                weightDelta.className   = 'weight-delta up';
+            } else {
+                weightDelta.textContent = '— ±0 kg';
+                weightDelta.className   = 'weight-delta down';
+            }
         }
+
+        // Chart mit echten Daten rendern
         renderProfileWeightChart(bwEntries.slice(-7));
+    } else {
+        // Keine Bodyweight-Daten → Fallback
+        if (weightValEl)  weightValEl.textContent  = '–';
+        if (weightDispEl) weightDispEl.textContent = '–';
+        if (weightDelta)  { weightDelta.textContent = ''; }
     }
+
+    // ── Gewicht eintragen (Button verdrahten) ──────────────
+    const addBtn = document.getElementById('addWeightBtn');
+    const row    = document.getElementById('weightInputRow');
+    const inp    = document.getElementById('weightInput');
+    const sav    = document.getElementById('saveWeightBtn');
+
+    // Vorherige Listener entfernen (clone trick)
+    if (addBtn) {
+        const newAddBtn = addBtn.cloneNode(true);
+        addBtn.parentNode.replaceChild(newAddBtn, addBtn);
+        newAddBtn.addEventListener('click', () => {
+            row.classList.toggle('visible');
+            if (row.classList.contains('visible')) inp.focus();
+        });
+    }
+    if (sav) {
+        const newSav = sav.cloneNode(true);
+        sav.parentNode.replaceChild(newSav, sav);
+        newSav.addEventListener('click', () => {
+            const v = parseFloat(inp.value);
+            if (!isNaN(v) && v > 30 && v < 300) {
+                // In state.bodyweight speichern
+                const dateStr = today();
+                state.bodyweight = state.bodyweight.filter(e => e.date !== dateStr);
+                state.bodyweight.push({ date: dateStr, weight: v });
+                save();
+                inp.value = '';
+                row.classList.remove('visible');
+                toast('Gewicht gespeichert!', 'success');
+                renderProfileView(); // neu rendern
+            }
+        });
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') newSav.click(); });
+    }
+}
+
+function renderProfileWeightChart(entries) {
+    const chart = document.getElementById('weightChart');
+    if (!chart || !entries.length) return;
+
+    const vals = entries.map(e => e.weight);
+    const mn = Math.min(...vals) - 0.5;
+    const mx = Math.max(...vals) + 0.5;
+
+    chart.innerHTML = '';
+    entries.forEach((e, i) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'weight-bar-wrap';
+
+        const pct = ((e.weight - mn) / (mx - mn)) * 100;
+        const bar = document.createElement('div');
+        bar.className = 'weight-bar' + (i === entries.length - 1 ? ' active' : '');
+        bar.style.height = Math.max(6, pct * 0.36) + 'px';
+
+        const lbl = document.createElement('div');
+        lbl.className = 'weight-bar-label';
+        // Wochentag aus Datum berechnen
+        const days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+        lbl.textContent = days[new Date(e.date).getDay()];
+
+        wrap.appendChild(bar);
+        wrap.appendChild(lbl);
+        chart.appendChild(wrap);
+    });
 }
 
 function prevDay(dateStr) {
