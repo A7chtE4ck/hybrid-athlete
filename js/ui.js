@@ -741,108 +741,60 @@ function renderProfileView() {
         .slice()
         .sort((a, b) => a.date.localeCompare(b.date));
 
-    // ── Stats ──────────────────────────────────────────────
-    // Streak: calcStreak() aus dem Hauptcode wiederverwenden
-    const streakEl = document.getElementById('streakVal');
-    if (streakEl) streakEl.textContent = calcStreak();
+    // IDs aus index.html
+    document.getElementById('profile-streak').textContent   = calcStreak();
+    document.getElementById('profile-workouts').textContent = workouts.length;
 
-    const workoutsEl = document.getElementById('workoutsVal');
-    if (workoutsEl) workoutsEl.textContent = workouts.length;
-
-    // ── Gewicht ────────────────────────────────────────────
-    const weightValEl  = document.getElementById('weightVal');
-    const weightDispEl = document.getElementById('weightDisplay');
-    const weightDelta  = document.getElementById('weightDelta');
+    const weightEl      = document.getElementById('profile-weight');
+    const weightBigEl   = document.getElementById('profile-weight-big');
+    const weightDeltaEl = document.getElementById('profile-weight-delta');
 
     if (bwEntries.length > 0) {
         const latest = bwEntries[bwEntries.length - 1];
         const prev   = bwEntries[bwEntries.length - 2];
 
-        if (weightValEl)  weightValEl.textContent  = latest.weight.toFixed(1);
-        if (weightDispEl) weightDispEl.textContent = latest.weight.toFixed(1);
+        if (weightEl)    weightEl.textContent    = latest.weight.toFixed(1);
+        if (weightBigEl) weightBigEl.textContent = latest.weight.toFixed(1);
 
-        if (prev && weightDelta) {
+        if (prev && weightDeltaEl) {
             const diff = latest.weight - prev.weight;
-            if (diff < 0) {
-                weightDelta.textContent = '▼ ' + Math.abs(diff).toFixed(1) + ' kg';
-                weightDelta.className   = 'weight-delta down';
-            } else if (diff > 0) {
-                weightDelta.textContent = '▲ +' + diff.toFixed(1) + ' kg';
-                weightDelta.className   = 'weight-delta up';
-            } else {
-                weightDelta.textContent = '— ±0 kg';
-                weightDelta.className   = 'weight-delta down';
-            }
+            weightDeltaEl.textContent = diff < 0
+                ? '▼ ' + Math.abs(diff).toFixed(1) + ' kg'
+                : diff > 0 ? '▲ +' + diff.toFixed(1) + ' kg'
+                    : '— ±0 kg';
+            weightDeltaEl.className = 'weight-delta ' + (diff <= 0 ? 'down' : 'up');
         }
 
-        // Chart mit echten Daten rendern
         renderProfileWeightChart(bwEntries.slice(-7));
     } else {
-        // Keine Bodyweight-Daten → Fallback
-        if (weightValEl)  weightValEl.textContent  = '–';
-        if (weightDispEl) weightDispEl.textContent = '–';
-        if (weightDelta)  { weightDelta.textContent = ''; }
-    }
-
-    // ── Gewicht eintragen (Button verdrahten) ──────────────
-    const addBtn = document.getElementById('addWeightBtn');
-    const row    = document.getElementById('weightInputRow');
-    const inp    = document.getElementById('weightInput');
-    const sav    = document.getElementById('saveWeightBtn');
-
-    // Vorherige Listener entfernen (clone trick)
-    if (addBtn) {
-        const newAddBtn = addBtn.cloneNode(true);
-        addBtn.parentNode.replaceChild(newAddBtn, addBtn);
-        newAddBtn.addEventListener('click', () => {
-            row.classList.toggle('visible');
-            if (row.classList.contains('visible')) inp.focus();
-        });
-    }
-    if (sav) {
-        const newSav = sav.cloneNode(true);
-        sav.parentNode.replaceChild(newSav, sav);
-        newSav.addEventListener('click', () => {
-            const v = parseFloat(inp.value);
-            if (!isNaN(v) && v > 30 && v < 300) {
-                // In state.bodyweight speichern
-                const dateStr = today();
-                state.bodyweight = state.bodyweight.filter(e => e.date !== dateStr);
-                state.bodyweight.push({ date: dateStr, weight: v });
-                save();
-                inp.value = '';
-                row.classList.remove('visible');
-                toast('Gewicht gespeichert!', 'success');
-                renderProfileView(); // neu rendern
-            }
-        });
-        inp.addEventListener('keydown', e => { if (e.key === 'Enter') newSav.click(); });
+        if (weightEl)      weightEl.textContent      = '–';
+        if (weightBigEl)   weightBigEl.textContent   = '–';
+        if (weightDeltaEl) weightDeltaEl.textContent = '';
     }
 }
 
+// Nur EINE Definition — löscht die alte doppelte
 function renderProfileWeightChart(entries) {
-    const chart = document.getElementById('weightChart');
+    const chart = document.getElementById('profile-weight-chart');
     if (!chart || !entries.length) return;
 
     const vals = entries.map(e => e.weight);
     const mn = Math.min(...vals) - 0.5;
     const mx = Math.max(...vals) + 0.5;
+    const dayNames = ['So','Mo','Di','Mi','Do','Fr','Sa'];
 
     chart.innerHTML = '';
     entries.forEach((e, i) => {
         const wrap = document.createElement('div');
         wrap.className = 'weight-bar-wrap';
 
-        const pct = ((e.weight - mn) / (mx - mn)) * 100;
         const bar = document.createElement('div');
         bar.className = 'weight-bar' + (i === entries.length - 1 ? ' active' : '');
-        bar.style.height = Math.max(6, pct * 0.36) + 'px';
+        bar.style.height = Math.max(6, ((e.weight - mn) / (mx - mn)) * 100 * 0.36) + 'px';
 
         const lbl = document.createElement('div');
         lbl.className = 'weight-bar-label';
-        // Wochentag aus Datum berechnen
-        const days = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
-        lbl.textContent = days[new Date(e.date).getDay()];
+        lbl.textContent = dayNames[new Date(e.date).getDay()];
 
         wrap.appendChild(bar);
         wrap.appendChild(lbl);
@@ -850,26 +802,10 @@ function renderProfileWeightChart(entries) {
     });
 }
 
+
 function prevDay(dateStr) {
     const d = new Date(dateStr);
     d.setDate(d.getDate() - 1);
     return d.toISOString().slice(0,10);
 }
 
-function renderProfileWeightChart(entries) {
-    const chart = document.getElementById('profile-weight-chart');
-    if (!chart) return;
-    const vals = entries.map(e => e.weight);
-    const mn = Math.min(...vals) - 0.5, mx = Math.max(...vals) + 0.5;
-    chart.innerHTML = '';
-    entries.forEach((e, i) => {
-        const wrap = document.createElement('div'); wrap.className = 'weight-bar-wrap';
-        const pct = ((e.weight - mn) / (mx - mn)) * 100;
-        const bar = document.createElement('div');
-        bar.className = 'weight-bar' + (i === entries.length - 1 ? ' active' : '');
-        bar.style.height = Math.max(6, pct * 0.36) + 'px';
-        const lbl = document.createElement('div'); lbl.className = 'weight-bar-label';
-        lbl.textContent = e.date.slice(5); // MM-DD
-        wrap.appendChild(bar); wrap.appendChild(lbl); chart.appendChild(wrap);
-    });
-}
